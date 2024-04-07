@@ -1,4 +1,6 @@
 using WorkerService.Options;
+using WorkerService.Services.Implementations;
+using WorkerService.Services.Interfaces;
 using WorkerService.Workers;
 
 var builder = Host.CreateDefaultBuilder(args)
@@ -20,10 +22,16 @@ void ConfigureAppConfiguration(HostBuilderContext hostContext, IConfigurationBui
 
 void ConfigureServices(HostBuilderContext hostContext, IServiceCollection services)
 {
+    // ️ Register framework services
+    services.AddHttpClient();
+
+    // ⚙️ Configure options from app configuration
     services.AddOptions<PriceAlertOptions>()
         .Bind(hostContext.Configuration.GetSection(PriceAlertOptions.ConfigSection))
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
+    // Register application-specific services
+    services.AddScoped<ICryptoPriceService, CryptoPriceService>();
     services.AddHostedService<PriceAlertWorker>();
 }
