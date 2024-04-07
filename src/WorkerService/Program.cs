@@ -1,4 +1,6 @@
 using WorkerService.Options;
+using WorkerService.Repositories.Implementations;
+using WorkerService.Repositories.Interfaces;
 using WorkerService.Services.Implementations;
 using WorkerService.Services.Interfaces;
 using WorkerService.Workers;
@@ -32,6 +34,7 @@ void ConfigureServices(HostBuilderContext hostContext, IServiceCollection servic
         .ValidateOnStart();
 
     // Register application-specific services
+    services.AddScoped<IPriceChangeRepository, PriceChangeRepository>();
     services.AddScoped<ICryptoPriceService, CryptoPriceService>();
     services.AddHostedService<PriceAlertWorker>();
 }
