@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Options;
 using WorkerService.Models;
 using WorkerService.Options;
@@ -7,7 +8,7 @@ namespace WorkerService.Repositories.Implementations;
 
 public class PriceChangeRepository(IOptionsSnapshot<PriceAlertOptions> priceAlertOptions) : IPriceChangeRepository
 {
-    private static readonly Dictionary<string, float> PriceChangeHistory = new();
+    private static readonly ConcurrentDictionary<string, float> PriceChangeHistory = new();
 
     public IEnumerable<string> GetPriceChangeAlerts(IEnumerable<PriceMovementModel> priceMovements)
     {
@@ -23,9 +24,9 @@ public class PriceChangeRepository(IOptionsSnapshot<PriceAlertOptions> priceAler
             UpdatePriceChangeHistory(movement.Symbol, currentChangePercent);
 
             if (currentChangePercent >= priceAlertOptions.Value.AlertThreshold)
-                yield return $"{movement.Symbol} has increased by {movement.PriceChangePercent}%";
+                yield return $"{movement.Symbol} +{movement.PriceChangePercent:F2}% 🚀";
             else if (currentChangePercent <= -priceAlertOptions.Value.AlertThreshold)
-                yield return $"{movement.Symbol} has decreased by {movement.PriceChangePercent}%";
+                yield return $"{movement.Symbol} {movement.PriceChangePercent:F2}% 🐻";
         }
     }
 

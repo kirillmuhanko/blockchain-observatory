@@ -1,5 +1,7 @@
 using Serilog;
 using Serilog.Events;
+using WorkerService.Commands.Implementations;
+using WorkerService.Commands.Interfaces;
 using WorkerService.Options;
 using WorkerService.Repositories.Implementations;
 using WorkerService.Repositories.Interfaces;
@@ -54,18 +56,27 @@ void ConfigureAppConfiguration(HostBuilderContext hostContext, IConfigurationBui
 
 void ConfigureServices(HostBuilderContext hostContext, IServiceCollection services)
 {
-    // ️ Register framework services
     services.AddHttpClient();
     services.AddSerilog();
 
-    // ⚙️ Configure options from app configuration
     services.AddOptions<PriceAlertOptions>()
         .Bind(hostContext.Configuration.GetSection(PriceAlertOptions.ConfigSection))
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
-    // Register application-specific services
+    services.AddScoped<IBotCommand, PingBotCommand>();
+    services.AddScoped<IBotCommand, StartBotCommand>();
+    services.AddSingleton<IBotCommandHandler, BotCommandHandler>();
+    services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IPriceChangeRepository, PriceChangeRepository>();
     services.AddScoped<ICryptoPriceService, CryptoPriceService>();
     services.AddHostedService<PriceAlertWorker>();
+
+    services.AddSingleton<TelegramBotWorker>();
+    services.AddSingleton<ITelegramAlertService>(provider =>
+    {
+        var telegramBotWorker = provider.GetService<TelegramBotWorker>();
+        return telegramBotWorker ?? throw new InvalidOperationException($"{nameof(TelegramBotWorker)} not registered.");
+    });
+    services.AddHostedService<TelegramBotWorker>();
 }

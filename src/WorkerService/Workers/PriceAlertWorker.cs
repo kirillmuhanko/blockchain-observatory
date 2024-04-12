@@ -12,12 +12,19 @@ public class PriceAlertWorker(IServiceScopeFactory serviceScopeFactory) : Backgr
         while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = serviceScopeFactory.CreateScope();
-            var priceAlertOptions = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<PriceAlertOptions>>();
             var cryptoPriceService = scope.ServiceProvider.GetRequiredService<ICryptoPriceService>();
-            var priceChangeRepository = scope.ServiceProvider.GetRequiredService<IPriceChangeRepository>();
             var priceMovements = await cryptoPriceService.FetchLatestPriceMovementsAsync();
-            // ReSharper disable once UnusedVariable
+
+            var priceChangeRepository = scope.ServiceProvider.GetRequiredService<IPriceChangeRepository>();
             var alerts = priceChangeRepository.GetPriceChangeAlerts(priceMovements);
+
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var users = await userRepository.GetUsersAsync();
+
+            var telegramAlertService = scope.ServiceProvider.GetRequiredService<ITelegramAlertService>();
+            await telegramAlertService.SendMessagesAsync(users, alerts);
+
+            var priceAlertOptions = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<PriceAlertOptions>>();
             await Task.Delay(priceAlertOptions.Value.AutoRetryDelay, stoppingToken);
         }
     }
