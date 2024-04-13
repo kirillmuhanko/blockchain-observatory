@@ -69,6 +69,7 @@ void ConfigureServices(HostBuilderContext hostContext, IServiceCollection servic
     services.AddSingleton<IBotCommandHandler, BotCommandHandler>();
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IPriceChangeRepository, PriceChangeRepository>();
+    services.AddScoped<IInternetConnectivityService, InternetConnectivityService>();
     services.AddScoped<ICryptoPriceService, CryptoPriceService>();
     services.AddHostedService<PriceAlertWorker>();
 

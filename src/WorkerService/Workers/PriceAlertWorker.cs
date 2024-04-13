@@ -12,6 +12,11 @@ public class PriceAlertWorker(IServiceScopeFactory serviceScopeFactory) : Backgr
         while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = serviceScopeFactory.CreateScope();
+            var internetConnectivityService = scope.ServiceProvider.GetRequiredService<IInternetConnectivityService>();
+
+            if (!await internetConnectivityService.CheckInternetConnectionAsync())
+                continue;
+
             var cryptoPriceService = scope.ServiceProvider.GetRequiredService<ICryptoPriceService>();
             var priceMovements = await cryptoPriceService.FetchLatestPriceMovementsAsync();
 
