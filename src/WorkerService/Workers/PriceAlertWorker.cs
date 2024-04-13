@@ -16,7 +16,7 @@ public class PriceAlertWorker(IServiceScopeFactory serviceScopeFactory) : Backgr
             var priceMovements = await cryptoPriceService.FetchLatestPriceMovementsAsync();
 
             var priceChangeRepository = scope.ServiceProvider.GetRequiredService<IPriceChangeRepository>();
-            var alerts = priceChangeRepository.GetPriceChangeAlerts(priceMovements);
+            var alerts = priceChangeRepository.GetPriceChangeAlerts(priceMovements).ToList();
 
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var users = await userRepository.GetUsersAsync();
