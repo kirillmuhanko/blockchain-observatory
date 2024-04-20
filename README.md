@@ -18,5 +18,5 @@ setx BlockchainObservatory__PriceAlertWorker__Telegram__BotToken "YOUR_BOT_TOKEN
 ### Service Installation
 Deploy the service using the following command:
 ```powershell
-sc create BlockchainObservatory.WorkerService binpath= "..\publish\WorkerService.exe"
+sc.exe create BlockchainObservatory.WorkerService binpath= "..\publish\WorkerService.exe"
 ```
